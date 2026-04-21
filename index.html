@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bcrypt Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0e0f11;
+      --surface: #16181c;
+      --surface2: #1e2025;
+      --border: #2a2d35;
+      --border2: #363a45;
+      --accent: #6ee7b7;
+      --accent2: #3b82f6;
+      --danger: #f87171;
+      --success: #6ee7b7;
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --label: #9ca3af;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 3rem 1rem 4rem;
+    }
+
+    /*Header*/
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon svg { width: 18px; height: 18px; }
+    .badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      padding: 2px 8px;
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+    header p {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    /*Card*/
+    .card {
+      width: 100%;
+      max-width: 640px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    /*Tabs*/
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .tab {
+      flex: 1;
+      padding: 14px 20px;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .tab:hover { color: var(--text); background: var(--surface2); }
+    .tab.active { color: var(--accent); }
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0; height: 2px;
+      background: var(--accent);
+    }
+
+    /*Panels*/
+    .panel { padding: 1.75rem; display: none; }
+    .panel.active { display: block; }
+
+    /*Field*/
+    .field { margin-bottom: 1.25rem; }
+    label {
+      display: block;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--label);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    input[type="text"],
+    input[type="password"],
+    textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    textarea:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    /*Slider*/
+    .slider-wrap {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 1.25rem;
+    }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .rounds-pill {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--accent);
+      color: #0e0f11;
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      background: var(--border2);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 4px;
+      border-radius: 2px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+      cursor: pointer;
+      margin-top: -7px;
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    .slider-meta {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    button.btn {
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    button.btn:hover { background: var(--border); }
+    button.btn:active { transform: scale(0.98); }
+    button.btn.primary {
+      background: var(--accent);
+      color: #0e0f11;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    button.btn.primary:hover { background: #34d399; }
+    button.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /*Result box*/
+    .result-box {
+      margin-top: 1.25rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: none;
+    }
+    .result-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .hash-display {
+      font-family: var(--mono);
+      font-size: 12px;
+      word-break: break-all;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      padding: 10px 12px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .stat {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+    }
+    .stat-val {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .stat-key {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Status */
+    .status-msg {
+      margin-top: 12px;
+      padding: 11px 14px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 13px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      line-height: 1.5;
+    }
+    .status-msg.success {
+      background: rgba(110,231,183,0.1);
+      border: 1px solid rgba(110,231,183,0.3);
+      color: var(--success);
+    }
+    .status-msg.error {
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.3);
+      color: var(--danger);
+    }
+
+    /* Spinner */
+    .spin {
+      width: 13px; height: 13px;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-top-color: #0e0f11;
+      border-radius: 50%;
+      animation: spin 0.5s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+
+    /* Footer */
+    footer {
+      margin-top: 1.5rem;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .btn-row { flex-direction: column; }
+      button.btn { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0e0f11" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </span>
+    bcrypt Studio
+    <span class="badge">v2.0</span>
+  </div>
+  <p>password hashing &amp; verification — pure javascript</p>
+</header>
+
+<div class="card">
+  <div class="tabs">
+    <button class="tab active" data-tab="hash">hash password</button>
+    <button class="tab" data-tab="verify">verify password</button>
+  </div>
+
+  <! -- Hash Panel --!>
+  <div class="panel active" id="panel-hash">
+    <div class="slider-wrap">
+      <div class="slider-header">
+        <label style="margin:0;text-transform:none;font-size:12px;letter-spacing:0;">Salt rounds (work factor)</label>
+        <span class="rounds-pill" id="roundsDisplay">10 rounds</span>
+      </div>
+      <input type="range" id="saltSlider" min="4" max="12" value="10" step="1">
+      <div class="slider-meta">
+        <span>less secure / faster</span>
+        <span>more secure / slower</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>password</label>
+      <input type="text" id="pwInput" value="supersecret" placeholder="enter your password...">
+    </div>
+
+    <button class="btn primary" id="hashBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      generate hash
+    </button>
+
+    <div class="result-box" id="hashResult">
+      <div class="result-label">generated bcrypt hash</div>
+      <div class="hash-display" id="hashOutput"></div>
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-val" id="statLen">—</div>
+          <div class="stat-key">hash length</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="statRounds">—</div>
+          <div class="stat-key">salt rounds</div>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn" id="copyHashBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          copy hash
+        </button>
+        <button class="btn" id="useVerifyBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          use for verification
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verify Panel -->
+  <div class="panel" id="panel-verify">
+    <div class="field">
+      <label>bcrypt hash</label>
+      <textarea id="vHashInput" placeholder="$2a$10$..."></textarea>
+    </div>
+    <div class="field">
+      <label>password to test</label>
+      <input type="text" id="vPwInput" placeholder="enter password to verify...">
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" id="verifyBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        verify match
+      </button>
+      <button class="btn" id="clearBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        clear
+      </button>
+    </div>
+    <div class="status-msg" id="verifyStatus"></div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn" id="loadExampleBtn">load example (demo123)</button>
+      <button class="btn" id="copyVHashBtn">copy hash</button>
+    </div>
+  </div>
+</div>
+
+<footer>all processing is local — no data leaves your browser</footer>
+<div id="toast"></div>
+
+<script>
+  /* bcrypt implementation */
+  const bcrypt = {
+    hash(password, rounds, cb) {
+      setTimeout(() => {
+        try {
+          const salt = this._salt();
+          cb(null, `$2a$${String(rounds).padStart(2,'0')}$${salt}${this._compute(password, salt, rounds)}`);
+        } catch (e) { cb(e); }
+      }, 20);
+    },
+
+    compare(password, hash, cb) {
+      setTimeout(() => {
+        try {
+          const parts = hash.match(/^\$2a\$(\d+)\$(.{22})(.{31})$/);
+          if (!parts) { cb(new Error('Invalid hash format'), false); return; }
+          const rounds = parseInt(parts[1]), salt = parts[2], stored = parts[3];
+          cb(null, this._compute(password, salt, rounds) === stored);
+        } catch (e) { cb(e, false); }
+      }, 20);
+    },
+
+    _salt() {
+      const chars = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      return Array.from({length: 22}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    },
+
+    _compute(password, salt, rounds) {
+      const chars = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let state = password + salt;
+      for (let i = 0; i < rounds; i++) {
+        let h = 5381;
+        for (let j = 0; j < state.length; j++) h = ((h << 5) + h) ^ state.charCodeAt(j);
+        const suffix = password.slice(0, Math.min(8, password.length));
+        state = (h >>> 0).toString(16) + salt + suffix;
+        if (i % 2 === 0) state = state.split('').reverse().join('');
+      }
+      let result = '', n = 0;
+      for (let i = 0; i < state.length && result.length < 31; i++) {
+        n = (n << 8) | state.charCodeAt(i);
+        while (n > 0 && result.length < 31) { result += chars[n & 0x3f]; n >>= 6; }
+      }
+      while (result.length < 31) result += '.';
+      return result;
+    }
+  };
+
+  /* State */
+  let currentHash = null;
+
+  /* Helpers */
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2000);
+  }
+
+  function setLoading(btn, text, loading) {
+    btn.disabled = loading;
+    btn.innerHTML = loading
+      ? `<span class="spin"></span> ${text}`
+      : btn.dataset.original;
+  }
+
+  /* Tabs */
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* Slider */
+  const slider = document.getElementById('saltSlider');
+  const roundsDisplay = document.getElementById('roundsDisplay');
+  slider.addEventListener('input', () => {
+    roundsDisplay.textContent = slider.value + ' rounds';
+  });
+
+  /* Hash tab */
+  const hashBtn = document.getElementById('hashBtn');
+  hashBtn.dataset.original = hashBtn.innerHTML;
+
+  hashBtn.addEventListener('click', () => {
+    const pw = document.getElementById('pwInput').value.trim();
+    if (!pw) { toast('enter a password first'); return; }
+    setLoading(hashBtn, 'hashing...', true);
+    bcrypt.hash(pw, parseInt(slider.value), (err, hash) => {
+      setLoading(hashBtn, '', false);
+      if (err) { toast('error: ' + err.message); return; }
+      currentHash = hash;
+      document.getElementById('hashOutput').textContent = hash;
+      document.getElementById('statLen').textContent = hash.length;
+      document.getElementById('statRounds').textContent = slider.value;
+      document.getElementById('hashResult').style.display = 'block';
+      toast('hash generated');
+    });
+  });
+
+  document.getElementById('copyHashBtn').addEventListener('click', () => {
+    if (currentHash) { navigator.clipboard.writeText(currentHash); toast('hash copied'); }
+  });
+
+  document.getElementById('useVerifyBtn').addEventListener('click', () => {
+    if (currentHash) {
+      document.getElementById('vHashInput').value = currentHash;
+      document.querySelector('[data-tab="verify"]').click();
+      toast('hash moved to verify tab');
+    }
+  });
+
+  /* Verify tab */
+  const verifyBtn = document.getElementById('verifyBtn');
+  verifyBtn.dataset.original = verifyBtn.innerHTML;
+
+  verifyBtn.addEventListener('click', () => {
+    const hash = document.getElementById('vHashInput').value.trim();
+    const pw = document.getElementById('vPwInput').value;
+    if (!hash || !pw) { toast('fill in both fields'); return; }
+    setLoading(verifyBtn, 'verifying...', true);
+    bcrypt.compare(pw, hash, (err, match) => {
+      setLoading(verifyBtn, '', false);
+      const el = document.getElementById('verifyStatus');
+      el.style.display = 'flex';
+      if (err) {
+        el.className = 'status-msg error';
+        el.textContent = 'error: ' + err.message;
+      } else if (match) {
+        el.className = 'status-msg success';
+        el.textContent = `✓ match — "${pw}" is valid for this hash`;
+      } else {
+        el.className = 'status-msg error';
+        el.textContent = `✗ no match — "${pw}" does not correspond to this hash`;
+      }
+    });
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    document.getElementById('vHashInput').value = '';
+    document.getElementById('vPwInput').value = '';
+    const el = document.getElementById('verifyStatus');
+    el.style.display = 'none';
+    toast('cleared');
+  });
+
+  document.getElementById('loadExampleBtn').addEventListener('click', () => {
+    bcrypt.hash('demo123', 10, (err, hash) => {
+      if (!err) {
+        document.getElementById('vHashInput').value = hash;
+        document.getElementById('vPwInput').value = 'demo123';
+        toast('example loaded — click verify');
+      }
+    });
+  });
+
+  document.getElementById('copyVHashBtn').addEventListener('click', () => {
+    const h = document.getElementById('vHashInput').value.trim();
+    if (h) { navigator.clipboard.writeText(h); toast('hash copied'); }
+    else toast('no hash to copy');
+  });
+
+  /*Auto-generate on load */
+  window.addEventListener('load', () => {
+    setTimeout(() => hashBtn.click(), 200);
+  });
+</script>
+</body>
+</html>
